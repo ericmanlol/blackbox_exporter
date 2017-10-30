@@ -43,8 +43,6 @@ func chooseProtocol(preferredIPProtocol string, target string, registry *prometh
 	level.Info(logger).Log("msg", "Resolving target address", "preferred_ip_protocol", preferredIPProtocol)
 	resolveStart := time.Now()
 
-	defer probeDNSLookupTimeSeconds.Add(time.Since(resolveStart).Seconds())
-
 	ip, err := net.ResolveIPAddr(preferredIPProtocol, target)
 	if err != nil {
 		level.Warn(logger).Log("msg", "Resolution with preferred IP protocol failed, attempting fallback protocol", "fallback_protocol", fallbackProtocol, "err", err)
@@ -60,6 +58,7 @@ func chooseProtocol(preferredIPProtocol string, target string, registry *prometh
 		probeIPProtocolGauge.Set(4)
 	}
 
+	probeDNSLookupTimeSeconds.Add(time.Since(resolveStart).Seconds())
 	level.Info(logger).Log("msg", "Resolved target address", "ip", ip)
 	return ip, nil
 }
